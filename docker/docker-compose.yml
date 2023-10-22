@@ -35,11 +35,3 @@ services:
     environment:
       POSTGRES_PASSWORD: example
       POSTGRES_USER: docker
-
-  adminer:
-    container_name: ${ENV}_adminer
-    image: adminer
-    ports:
-      - 8083:8080
-    depends_on:
-      - db
