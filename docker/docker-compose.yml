@@ -1,0 +1,45 @@
+version: '3'
+
+services:
+  nginx:
+    container_name: nginx-${ENV}
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - ${EXTERNAL_PORT_LOCAL1}:${INTERNAL_PORT_LOCAL1}
+    volumes:
+      - ${SRC_PATH_LOCAL1}:/src
+      - ./nginx/def.conf:/etc/nginx/conf.d/default.conf
+    links:
+      - php
+    depends_on:
+      - php
+    command: nginx -g "daemon off;"
+
+  php:
+    container_name: php-${ENV}
+    build:
+      context: ./php
+      dockerfile: Dockerfile
+    volumes:
+        - ${SRC_PATH_LOCAL1}:/src
+        - ./php/conf:/usr/local/etc/php/conf.d/custom.ini
+    ports:
+      - 6001:6001
+  db:
+    container_name: db-${ENV}
+    image: postgres:latest
+    volumes:
+      - ./db/data:/var/lib/postgresql/data
+    environment:
+      POSTGRES_PASSWORD: example
+      POSTGRES_USER: docker
+
+  adminer:
+    container_name: ${ENV}_adminer
+    image: adminer
+    ports:
+      - 8083:8080
+    depends_on:
+      - db

@@ -1,0 +1,96 @@
+swagger: "2.0"
+
+info:
+  description: "Chat project"
+  version: "-1"
+  title: "Swagger Chat project"
+
+host: "localhost:8090"
+basePath: "/api/chat"
+
+tags:
+  - name: Chat
+    description: Chat apis
+
+schemes:
+  - http
+
+paths:
+  /send:
+    post:
+      tags:
+        - Chat
+      summary: Sand message
+      description: ""
+      operationId: sendMessage
+      security:
+        - basic: []
+      parameters:
+        - name: message
+          type: string
+          in: formData
+          required: true
+          maxLength: 256
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: '#/definitions/SendMessageResponse'
+        500:
+          $ref: '#/definitions/ErrorResponse'
+
+  /history:
+    get:
+      tags:
+        - Chat
+      summary: Get chat history
+      description: ""
+      operationId: getHistory
+      security:
+        - basic: []
+      responses:
+        200:
+          description: Success
+          schema:
+            $ref: '#/definitions/GetHistoryResponse'
+        500:
+          $ref: '#/definitions/ErrorResponse'
+
+definitions:
+  ErrorResponse:
+    description: Error response
+    type: string
+  GetHistoryResponse:
+    type: object
+    required:
+      - data
+    properties:
+      data:
+        type: array
+        items:
+          $ref: '#/definitions/ChatMessage'
+  SendMessageResponse:
+    type: object
+    required:
+      - data
+    properties:
+      data:
+        $ref: '#/definitions/ChatMessage'
+  ChatMessage:
+    type: object
+    required:
+      - user
+      - message
+      - time
+    properties:
+      user:
+        type: string
+      message:
+        type: string
+      time:
+        type: string
+        format: datetime
+
+securityDefinitions:
+  basic:
+    type: basic
