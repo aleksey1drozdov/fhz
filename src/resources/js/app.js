@@ -5,14 +5,26 @@ import Pusher from 'pusher-js';
 
 let chat = document.getElementById("chat");
 let textField = document.getElementById("text");
+let myName = document.getElementById("name").textContent;
+let color1 = '#AD3E3EFF';
+let color2 = '#096FC9FF';
+
 textField.focus();
 
 function addMassage(time, user, message) {
-    let msg = "[" + time + "] " + user + ": " + message;
+    let msg = "[" + time + "] <strong style='color: " + getColor(user) + ";'>" + user + ":</strong> " + message;
     let el = document.createElement('div');
-    el.textContent = msg;
+    el.innerHTML = msg;
     chat.appendChild(el);
     textField.focus();
+}
+
+function disconnectMessage() {
+    sendMessage('=== im disconnected ===');
+}
+
+function getColor(context) {
+    return context === myName ? color1 : color2;
 }
 
 function sendMessage(text) {
@@ -57,7 +69,7 @@ axios.get('/api/chat/history')
         console.log(error);
     });
 
-window.Echo = new Echo({
+new Echo({
     broadcaster: 'pusher',
     key: 'chat',
     wsHost: window.location.hostname,
@@ -68,7 +80,9 @@ window.Echo = new Echo({
     authEndpoint: 'broadcasting/auth',
 })
     .private('chat')
-    // .channel('chat')
+    .subscribed(() => {
+        sendMessage('=== im connected ===');
+    })
     .listen('MessageSent', (e) => {
         addMassage(
             e.time,
@@ -76,3 +90,11 @@ window.Echo = new Echo({
             e.message
         );
     });
+
+window.onbeforeunload = function () {
+    disconnectMessage();
+};
+window.onclose = function () {
+    disconnectMessage();
+};
+
